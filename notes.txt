@@ -1,0 +1,119 @@
+My name is Enock! I am a developer. Developing solutions exites me!
+
+// MY CODE TO READ
+
+CODE TO ACCESS FORECAST
+// const url = 'https://api.darksky.net/forecast/9bfacb2e0a58d81c2a8be9c41733330c/37.8267,-122.4233'
+// const geocodeUrl= 'https://api.mapbox.com/geocoding/v5/mapbox.places/Los%20Angeles.json?access_token=pk.eyJ1IjoiZGV2ZW5vY2siLCJhIjoiY2p0c29wc2d6MHF3ODN5bDh4dDVkY2VycCJ9.qgI-1tQtS-VEghBYOwTrcA&limit=1'
+
+
+// request ({url: url, json: true},(error, response) => {
+    
+//     if (error) {
+//         console.log( 'Unable to access the Weather API')
+
+//     }else if (response.body.error) {
+//         console.log('No matching results for your request')
+
+//     }else {
+//         const temp = response.body.currently.temperature
+//         const precip =response.body.currently.precipProbability
+    
+//         console.log( 'It is currently ' +temp , ' degrees out.', 'There is a ' +precip ,'% chance of rain' )
+//     }
+       
+//     })
+
+
+
+//
+// Goal: Create a reusable function for getting the forecast
+//
+// 1. Setup the "forecast" function in utils/forecast.js
+// 2. Require the function in app.js and call it as shown below
+// 3. The forecast function should have three potential calls to callback:
+//    - Low level error, pass string for error
+//    - Coordinate error, pass string for error
+//    - Success, pass forecast string for data (same format as from before)
+
+
+NEW FORECAST CODE USING CALLBACKS()
+const request = require('request') 
+
+const forecast = (latitude,longitude, callback) =>{
+    const Url= 'https://api.darksky.net/forecast/9bfacb2e0a58d81c2a8be9c41733330c/' + latitude + ',' + longitude +''
+
+    request({ url:Url, json: true}, (error,response)=>{
+        if (error){
+            callback('Unable to access the Weather API services!' , undefined)
+        }else if (response.body.error){
+            callback('No matching results for your request', undefined)
+        }
+        else {
+            callback(undefined,
+                response.body.daily.data[0].summary + ' It is currently ' + response.body.currently.temperature + ' degrees out.There is a ' + response.body.currently.precipProbability + '% chance of rain'
+          )}          
+        
+    })
+
+}
+
+module.exports = forecast
+
+//NEW METHOD TO ACCESS forecast
+forecast('-75.7e088', 44.1545, (error, data) => {
+    console.log('Error:', error)
+    console.log('Data:', data)
+  })
+
+
+CODE TO ACCESS GEOCODING
+
+//     //Geocoding address=> lat/long => weather
+// request({url: geocodeUrl, json: true}, (error, response) => {
+
+//     if ( error ) {
+//         console.log("Unable to access the location services!")
+//     }else if ( response.body.features.length === 0) {
+//         console.log('Unable to find location. Try another Search')
+//     }else{
+//         const longitude= response.body.features[0].center[0]
+//         const latitude= response.body.features[0].center[1]
+//     console.log ('These are the geocordinates: latitude ' +latitude, 'longitude ' +longitude)
+//     } 
+        
+// })   
+
+
+NEW CODE USING CALLBACKS()
+const request = require('request') 
+
+const geocode = (address, callback) => {
+    const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(address) + '.json?access_token=pk.eyJ1IjoiZGV2ZW5vY2siLCJhIjoiY2p0c29wc2d6MHF3ODN5bDh4dDVkY2VycCJ9.qgI-1tQtS-VEghBYOwTrcA&limit=1'
+
+    request({ url: url, json: true}, (error,response)=>{
+        if (error){
+            callback('Unable to access the location services!' , undefined)
+        }else if (response.body.features.length === 0){
+            callback('Unable to find location. Try another Search', undefined)
+        }
+        else {
+            callback(undefined,{
+                longitude: response.body.features[0].center[0],
+                latitude: response.body.features[0].center[1],
+                location: response.body.features[0].place_name
+
+            })
+           
+        }
+    })
+}
+
+module.exports = geocode
+    
+NEW METHOD TO ACESS geocode 
+
+geocode('philadelphia', (error, data) => {
+    console.log('Error',error)
+    console.log('Data', data)
+})
